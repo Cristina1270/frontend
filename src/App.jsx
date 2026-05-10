@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = "http://172.31.41.97:3000/api/productos";
+const API = "/api/productos";
 
 function App() {
   const [productos, setProductos] = useState([]);
