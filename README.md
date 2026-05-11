@@ -1,16 +1,62 @@
-# React + Vite
+# Frontend - Gestión de Productos
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación web para gestionar productos desarrollada con React + Vite, desplegada en AWS EC2 mediante Docker y GitHub Actions.
 
-Currently, two official plugins are available:
+## Tecnologías
+- React 18 + Vite
+- Nginx (servidor web)
+- Docker (multi-stage build)
+- AWS EC2 + ECR
+- GitHub Actions (CI/CD)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Arquitectura
+Internet
+↓
+EC2-Frontend (Pública) → IP: 3.213.247.145
+└── Docker: nginx + React
+└── Proxy /api/ → EC2-Backend (Privada)
+└── Docker: Node.js + MySQL
 
-## React Compiler
+## Estructura del proyecto
+frontend/
+├── src/              → Código fuente React
+├── public/           → Archivos estáticos
+├── Dockerfile        → Multi-stage build (Node + Nginx)
+├── nginx.conf        → Configuración nginx con proxy al backend
+├── docker-compose.yml→ Para levantar localmente
+├── .dockerignore     → Archivos ignorados por Docker
+└── .github/
+└── workflows/
+└── cicd-frontend.yml → Pipeline CI/CD
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Variables de entorno
+No requiere variables de entorno. La URL del backend se configura en `nginx.conf`.
 
-## Expanding the ESLint configuration
+## Ejecutar localmente
+```bash
+docker-compose up -d
+```
+Acceder en: http://localhost
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Pipeline CI/CD
+El pipeline se activa con push en la rama `deploy` y ejecuta:
+1. **Build** → construye la imagen Docker
+2. **Push** → publica en Amazon ECR con tag versionado
+3. **Deploy** → se conecta por SSH a EC2 y actualiza el contenedor
+
+## Secrets requeridos
+| Secret | Descripción |
+|--------|-------------|
+| AWS_ACCESS_KEY_ID | Clave de acceso AWS |
+| AWS_SECRET_ACCESS_KEY | Clave secreta AWS |
+| AWS_SESSION_TOKEN | Token de sesión AWS |
+| AWS_REGION | Región AWS (us-east-1) |
+| AWS_ACCOUNT_ID | ID de cuenta AWS |
+| EC2_HOST | IP pública de la EC2 |
+| EC2_USER | Usuario EC2 (ec2-user) |
+| EC2_SSH_KEY | Clave privada SSH (.pem) |
+
+## Capturas de evidencia
+- Pipeline exitoso en GitHub Actions
+- Imagen publicada en Amazon ECR
+- Frontend funcionando en EC2
